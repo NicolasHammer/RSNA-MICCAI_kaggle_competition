@@ -28,7 +28,7 @@ class FeatureExtractor(nn.Module):
         conv_out = self.conv_layer(data)
         extracted_out = self.base_model(conv_out)
 
-        return torch.squeeze(extracted_out)
+        return extracted_out.view(extracted_out.shape[0], extracted_out.shape[1])
 
 
 class VideoMRIModel(nn.Module):
@@ -51,9 +51,9 @@ class VideoMRIModel(nn.Module):
         features_reshaped = features_extracted.view(batch_size, seq_length, -1)
 
         _, (hidden_states, _) = self.lstm(features_reshaped)
-        classification = self.linear(torch.squeeze(hidden_states))
+        classification = self.linear(torch.squeeze(hidden_states, 0))
 
-        return torch.squeeze(classification)
+        return classification.view(batch_size)
 
 
 class VideoMRIDataset(Dataset):
