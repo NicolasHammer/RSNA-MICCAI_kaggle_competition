@@ -18,19 +18,17 @@ class FeatureExtractor(nn.Module):
 
         self.conv_layer = nn.Sequential(
             nn.Conv2d(in_channels=num_channels, out_channels=3,
-                      kernel_size=(3, 3), stride="same"),
+                      kernel_size=(3, 3), padding="same"),
             nn.ReLU()
         )
         self.base_model = EfficientNet.from_pretrained(
             'efficientnet-b0', include_top=False)
-        self.avg_pool = nn.AvgPool2d(kernel_size=(7, 7))
 
     def forward(self, data: torch.Tensor) -> torch.Tensor:
         conv_out = self.conv_layer(data)
-        features_extracted = self.base_model(conv_out)
-        flattened_output = self.avg_pool(features_extracted)
+        extracted_out = self.base_model(conv_out)
 
-        return flattened_output
+        return torch.squeeze(extracted_out)
 
 
 class VideoMRIModel(nn.Module):
@@ -52,10 +50,10 @@ class VideoMRIModel(nn.Module):
         features_extracted = self.feature_extractor(data_reshaped)
         features_reshaped = features_extracted.view(batch_size, seq_length, -1)
 
-        time_analysis = self.lstm(features_reshaped)
-        classification = self.linear(time_analysis)
+        _, (hidden_states, _) = self.lstm(features_reshaped)
+        classification = self.linear(torch.squeeze(hidden_states))
 
-        return classification
+        return torch.squeeze(classification)
 
 
 class VideoMRIDataset(Dataset):
