@@ -66,6 +66,7 @@ class VideoMRIDataset(Dataset):
         self.class_data = class_data
         self.seq_length = seq_length
         self.directory = directory
+        self.image_size = image_size
 
         self.transforms = transforms.Compose([
             transforms.Resize(image_size),
@@ -83,13 +84,17 @@ class VideoMRIDataset(Dataset):
         final_tensor = []
         for mri_type in VideoMRIDataset.mri_types:
             mri_dir = os.path.join(patient_dir, mri_type)
-            image_names = os.listdir(mri_dir)
 
-            start_idx = np.random.randint(
-                0, len(image_names) - self.seq_length + 1)
-            images = [self.transforms(Image.open(os.path.join(mri_dir, image_names[i])))
-                      for i in range(start_idx, start_idx + self.seq_length)]
+            if os.path.isdir(mri_dir):
+                image_names = os.listdir(mri_dir)
 
-            final_tensor.append(torch.stack(images))
+                start_idx = np.random.randint(
+                    0, len(image_names) - self.seq_length + 1)
+                images = [self.transforms(Image.open(os.path.join(mri_dir, image_names[i])))
+                        for i in range(start_idx, start_idx + self.seq_length)]
+
+                final_tensor.append(torch.stack(images))
+            else:
+                final_tensor.append(torch.zeros(10, 1, *self.image_size, dtype=torch.float32))
 
         return torch.cat(final_tensor, 1), self.class_data[idx]
