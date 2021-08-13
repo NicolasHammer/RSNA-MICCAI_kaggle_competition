@@ -190,6 +190,6 @@ class VideoMRIDataset(Dataset):
             tensor_dict[mri_type] = (torch.stack([self.transforms(Image.open(os.path.join(mri_dir, image_name)).convert("RGB"))
                                                  for image_name in os.listdir(mri_dir)])
                                      if os.path.isdir(mri_dir)
-                                     else 0)
+                                     else torch.empty(0))
 
         return tensor_dict, self.class_data[idx]
