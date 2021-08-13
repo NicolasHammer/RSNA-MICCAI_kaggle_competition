@@ -128,7 +128,7 @@ class VideoMRIEnsemble(nn.Module):
         Classifcation as to whether the MGTM promoter has been methylized
         """
         MRI_output = torch.cat([
-            self.video_models[scan](video) if video != None
+            self.video_models[scan](video) if type(video) == torch.Tensor
             else torch.zeros(self.lstm_units).to(self.device)
             for scan, video in data.items()
         ])
@@ -190,6 +190,6 @@ class VideoMRIDataset(Dataset):
             tensor_dict[mri_type] = (torch.stack([self.transforms(Image.open(os.path.join(mri_dir, image_name)).convert("RGB"))
                                                  for image_name in os.listdir(mri_dir)])
                                      if os.path.isdir(mri_dir)
-                                     else None)
+                                     else 0)
 
         return tensor_dict, self.class_data[idx]
