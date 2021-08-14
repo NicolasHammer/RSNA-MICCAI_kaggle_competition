@@ -1,5 +1,6 @@
 import os
 from typing import Tuple, List, Dict
+import re
 
 import torch
 import torch.nn as nn
@@ -186,9 +187,12 @@ class VideoMRIDataset(Dataset):
         tensor_dict = {}
         for mri_type in VideoMRIDataset.mri_types:
             mri_dir = os.path.join(patient_dir, mri_type)
+            filenames = os.listdir(mri_dir)
+            filenames.sort(key=lambda k: [int(
+                c) if c.isdigit() else c for c in re.split(r'(\d+)', k)])
 
             tensor_dict[mri_type] = (torch.stack([self.transforms(Image.open(os.path.join(mri_dir, image_name)).convert("RGB"))
-                                                 for image_name in os.listdir(mri_dir)])
+                                                 for image_name in filenames])
                                      if os.path.isdir(mri_dir)
                                      else torch.empty(0))
 
