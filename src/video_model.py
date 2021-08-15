@@ -98,7 +98,7 @@ class VideoMRIModel(nn.Module):
 class VideoMRIEnsemble(nn.Module):
     """An ensemble of different VideoMRIModels combined by a linear layer"""
 
-    def __init__(self, scans: List[str], lstm_units: int, device: torch.device):
+    def __init__(self, scans: List[str], lstm_units: int):
         """
         Parameters
         ----------
@@ -108,7 +108,6 @@ class VideoMRIEnsemble(nn.Module):
         super(VideoMRIEnsemble, self).__init__()
 
         self.lstm_units = lstm_units
-        self.device = device
 
         self.video_models = nn.ModuleDict(
             {scan: VideoMRIModel(lstm_units) for scan in scans})
